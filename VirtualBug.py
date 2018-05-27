@@ -1,5 +1,6 @@
 import turtle
 import numpy as np
+from matplotlib import pyplot as plt
 
 class VirtualBug:
     def __init__(self, noise_level=.1):
@@ -25,16 +26,29 @@ class VirtualBug:
         self.y += self.velocity * np.sin(self.heading)
         if self.x > self.max_x:
             self.x = 2 * self.max_x - self.x
+            self.heading = np.pi - self.heading
         if self.x < self.min_x:
             self.x = abs(self.x)
-        if self.y > self.max_y
-            self.y = 2*self.max_y - self.y
+            self.heading = np.pi - self.heading
+        if self.y > self.max_y:
+            self.y = 2 * self.max_y - self.y
+            self.heading = 3*np.pi/2 - self.heading
         if self.y < self.min_y:
             self.y = abs(self.y)
+            self.heading = np.abs(np.pi/2 - self.heading)
 
-            
+def move_trial(moves):
+    positions = np.zeros((moves, 2))
+    bug = VirtualBug()
+    for i in range(moves):
+        positions[i, 0], positions[i, 1] = bug.x, bug.y
+        bug.move()
+    print(positions)
+
+def static_plot(moves):
+    pass
+
 
 
 if __name__ == "__main__":
-    bug = VirtualBug()
-    print(bug.heading)
+    move_trial(100)

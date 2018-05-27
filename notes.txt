@@ -1,3 +1,5 @@
 Kalman Filter sources:
     https://balzer82.github.io/Kalman/
 
+Particle Filter sources:
+    https://en.wikipedia.org/wiki/Particle_filter
