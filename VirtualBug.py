@@ -25,6 +25,14 @@ class VirtualBug:
         self.y += self.velocity * np.sin(self.heading)
         if self.x > self.max_x:
             self.x = 2 * self.max_x - self.x
+        if self.x < self.min_x:
+            self.x = abs(self.x)
+        if self.y > self.max_y
+            self.y = 2*self.max_y - self.y
+        if self.y < self.min_y:
+            self.y = abs(self.y)
+
+            
 
 
 if __name__ == "__main__":
