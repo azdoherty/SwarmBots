@@ -4,7 +4,7 @@ from matplotlib import pyplot as plt
 
 
 class VirtualBug:
-    def __init__(self, noise_level=.1):
+    def __init__(self, noise_level=.5):
         """
         A class to model
         :param noise_level:
@@ -21,6 +21,10 @@ class VirtualBug:
         self.last_moved = 0  # distance moved last
 
     def move(self):
+        """
+        advance the bug 1 move, randomly perturb velocity based on noise level prior to doing so.
+        :return: Nothing
+        """
         heading_adjust = (np.random.random() - .5) * self.noise_level
         self.heading += heading_adjust
         old_x, old_y = self.x, self.y
@@ -99,7 +103,7 @@ def dynamic_tracking(bug, moves):
 
 
 if __name__ == "__main__":
-    pos = move_trial(1000)
+    pos = move_trial(10000)
     static_plot(pos)
     b = VirtualBug()
     dynamic_tracking(b, 1000)
