@@ -20,7 +20,7 @@ class VirtualBug:
 
 
     def move(self):
-        heading_adjust = (np.random.random() - 1) * self.noise_level
+        heading_adjust = (np.random.random() - .5) * self.noise_level
         self.heading += heading_adjust
         self.x += self.velocity * np.cos(self.heading)
         self.y += self.velocity * np.sin(self.heading)
@@ -32,23 +32,32 @@ class VirtualBug:
             self.heading = np.pi - self.heading
         if self.y > self.max_y:
             self.y = 2 * self.max_y - self.y
-            self.heading = 3*np.pi/2 - self.heading
+            self.heading = -self.heading
         if self.y < self.min_y:
             self.y = abs(self.y)
-            self.heading = np.abs(np.pi/2 - self.heading)
+            self.heading = -self.heading
 
 def move_trial(moves):
-    positions = np.zeros((moves, 2))
+    positions = np.zeros((moves, 3))
     bug = VirtualBug()
     for i in range(moves):
         positions[i, 0], positions[i, 1] = bug.x, bug.y
+        positions[i, 2] = i
         bug.move()
-    print(positions)
+    return positions
 
 def static_plot(moves):
-    pass
+    fig, ax = plt.subplots()
+    ax.scatter(moves[:, 0], moves[:, 1], c=moves[:,1], alpha=0.5)
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    ax.grid(True)
+    ax.plot(moves[0, 0], moves[0, 1], 'r*')
+    fig.tight_layout()
+    plt.show()
 
 
 
 if __name__ == "__main__":
-    move_trial(100)
+    pos = move_trial(1000)
+    static_plot(pos)
