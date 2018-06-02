@@ -2,6 +2,7 @@ import turtle
 import numpy as np
 from matplotlib import pyplot as plt
 
+
 class VirtualBug:
     def __init__(self, noise_level=.1):
         """
@@ -17,7 +18,7 @@ class VirtualBug:
         self.y = np.random.randint(self.min_y, self.max_y)
         self.heading = np.random.random() * 2 * np.pi
         self.velocity = np.random.random() * 5
-        self.last_moved = 0 # distance moved last
+        self.last_moved = 0  # distance moved last
 
     def move(self):
         heading_adjust = (np.random.random() - .5) * self.noise_level
@@ -40,6 +41,7 @@ class VirtualBug:
 
         self.last_moved = np.sqrt((old_x - self.x)**2 + (old_y - self.y)**2)
 
+
 def move_trial(moves):
     positions = np.zeros((moves, 3))
     bug = VirtualBug()
@@ -48,6 +50,7 @@ def move_trial(moves):
         positions[i, 2] = i
         bug.move()
     return positions
+
 
 def static_plot(moves):
     fig, ax = plt.subplots()
@@ -59,6 +62,7 @@ def static_plot(moves):
     fig.tight_layout()
     plt.show()
 
+
 def dynamic_tracking(bug, moves):
     canvas = turtle.Screen()
     pad = 100
@@ -67,6 +71,7 @@ def dynamic_tracking(bug, moves):
     # draw box
     t = turtle.Turtle()
     t.penup()
+    t.speed("fastest")
     t.setx(-bug.max_x*1./2)
     t.sety(-bug.max_y*1./2)
     t.pendown()
@@ -78,28 +83,23 @@ def dynamic_tracking(bug, moves):
     t.left(90)
     t.forward(bug.max_y)
     t.penup()
-    #simulate moves
+    t.speed("fast")
+    t.color("red", "red")
+    # simulate moves
     t.setheading(bug.heading*360./(2*np.pi))
     t.setx(bug.x - bug.max_x * 1. / 2)
-    t.sety(bug.y -bug.max_y * 1. / 2)
+    t.sety(bug.y - bug.max_y * 1. / 2)
     t.pendown()
     for i in range(moves):
         bug.move()
-        x, y = bug.x, bug.y
         t.setheading(bug.heading * 360. / (2 * np.pi))
-
         t.forward(bug.last_moved)
-
-
-
-
 
     canvas.exitonclick()
 
 
-
 if __name__ == "__main__":
-    #pos = move_trial(1000)
-    #tatic_plot(pos)
+    pos = move_trial(1000)
+    static_plot(pos)
     b = VirtualBug()
     dynamic_tracking(b, 1000)
