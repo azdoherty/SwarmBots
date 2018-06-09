@@ -188,6 +188,6 @@ if __name__ == "__main__":
     b = VirtualBug()
     dynamic_tracking(b, 100000)
     '''
-    b = BugZone(50, True)
+    b = BugZone(10, True)
     b.simulate_movement(5000)
 

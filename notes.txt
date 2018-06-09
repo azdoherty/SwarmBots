@@ -1,5 +1,6 @@
 Kalman Filter sources:
     https://balzer82.github.io/Kalman/
+    https://github.com/rlabbe/Kalman-and-Bayesian-Filters-in-Python/blob/master/11-Extended-Kalman-Filters.ipynb
 
 Particle Filter sources:
     https://en.wikipedia.org/wiki/Particle_filter
