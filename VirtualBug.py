@@ -17,7 +17,7 @@ class VirtualBug:
         self.x = np.random.randint(self.min_x, self.max_x)
         self.y = np.random.randint(self.min_y, self.max_y)
         self.heading = np.random.random() * 2 * np.pi
-        self.velocity = np.random.random() * 5
+        self.velocity = np.random.random() * 20
         self.last_moved = 0  # distance moved last
 
     def move(self):
@@ -102,8 +102,80 @@ def dynamic_tracking(bug, moves):
     canvas.exitonclick()
 
 
+class BugZone:
+    def __init__(self, nBugs, visualize=False, *args):
+        """
+        :param nBugs:
+        :param xshape:
+        :param yshape:
+        :param visualize:
+        :param args:
+        """
+        self.nBugs = nBugs
+
+        self.visualize = visualize
+        self.canvas = None
+        self.bugs = []
+        for i in range(self.nBugs):
+
+            self.bugs.append(VirtualBug())
+            #self.bugs[-1].max_x = self.xshape
+            #self.bugs[-1].max_y = self.yshape
+        self.xshape = self.bugs[-1].max_x
+        self.yshape = self.bugs[-1].max_y
+        if self.visualize:
+            self.pad = 100
+            self.turtles = []
+            self.setup_canvas()
+            for b in self.bugs:
+                self.turtles.append(turtle.Turtle())
+                #self.turtles[-1].tracer(False)
+                self.turtles[-1].penup()
+                self.turtles[-1].setheading(self.bugs[-1].heading * 360. / (2 * np.pi))
+                self.turtles[-1].setx(self.bugs[-1].x - self.bugs[-1].max_x * 1. / 2)
+                self.turtles[-1].sety(self.bugs[-1].y - self.bugs[-1].max_y * 1. / 2)
+                r, g, b = np.random.randint(1, 255), np.random.randint(1, 255), np.random.randint(1, 255)
+                self.canvas.colormode(255)
+                self.turtles[-1].color(r, g, b)
+                self.turtles[-1].pendown()
+
+
+
+    def setup_canvas(self):
+        self.canvas = turtle.Screen()
+        self.canvas.setup(self.xshape + self.pad, self.yshape + self.pad)
+        # coordinate system needs to be transformed by half of the bounds of the box
+        # draw box
+        t = turtle.Turtle()
+        t.penup()
+        t.speed("fastest")
+        t.setx(-self.xshape * 1. / 2)
+        t.sety(-self.yshape * 1. / 2)
+        t.pendown()
+        t.forward(self.xshape)
+        t.left(90)
+        t.forward(self.yshape)
+        t.left(90)
+        t.forward(self.xshape)
+        t.left(90)
+        t.forward(self.yshape)
+        t.penup()
+
+    def simulate_movement(self, nmoves):
+        for i in range(nmoves):
+            for k in range(len(self.bugs)):
+                self.bugs[k].move()
+                self.turtles[k].setheading(self.bugs[k].heading * 360. / (2 * np.pi))
+                self.turtles[k].forward(self.bugs[k].last_moved)
+        self.canvas.exitonclick()
+
 if __name__ == "__main__":
+    '''
     pos = move_trial(10000)
     static_plot(pos)
     b = VirtualBug()
     dynamic_tracking(b, 1000)
+    '''
+    b = BugZone(5, True)
+    b.simulate_movement(500)
+
