@@ -127,6 +127,7 @@ class BugZone:
             self.pad = 100
             self.turtles = []
             self.setup_canvas()
+            turtle.tracer(0, 0)
             for b in self.bugs:
                 self.turtles.append(turtle.Turtle())
                 #self.turtles[-1].tracer(False)
@@ -137,8 +138,9 @@ class BugZone:
                 r, g, b = np.random.randint(1, 255), np.random.randint(1, 255), np.random.randint(1, 255)
                 self.canvas.colormode(255)
                 self.turtles[-1].color(r, g, b)
-                self.turtles[-1].pendown()
 
+                self.turtles[-1].pendown()
+            turtle.update()
 
 
     def setup_canvas(self):
@@ -162,17 +164,21 @@ class BugZone:
         t.penup()
 
     def simulate_movement(self, nmoves):
+
         for i in range(nmoves):
-            for k in range(len(self.bugs)):
-                self.bugs[k].move()
-                self.turtles[k].setheading((self.bugs[k].heading * 360. / (2 * np.pi)) % 360)
-                self.turtles[k].forward(self.bugs[k].last_moved)
-                x,y = self.bugs[k].x, self.bugs[k].y
-                tx, ty = self.turtles[k].xcor(), self.turtles[k].ycor()
-                #self.turtles[k].setx(x)
-                #self.turtles[k].sety(y)
-                print(k, x, tx)
+            #self.canvas.ontimer(self.move1())
+            self.move1()
+            turtle.update()
+
         self.canvas.exitonclick()
+
+    def move1(self):
+        for k in range(len(self.bugs)):
+            self.bugs[k].move()
+            self.turtles[k].setheading((self.bugs[k].heading * 360. / (2 * np.pi)) % 360)
+            self.turtles[k].forward(self.bugs[k].last_moved)
+            x, y = self.bugs[k].x, self.bugs[k].y
+            tx, ty = self.turtles[k].xcor(), self.turtles[k].ycor()
 
 if __name__ == "__main__":
     '''
@@ -182,6 +188,6 @@ if __name__ == "__main__":
     b = VirtualBug()
     dynamic_tracking(b, 100000)
     '''
-    b = BugZone(5, True)
-    b.simulate_movement(500)
+    b = BugZone(50, True)
+    b.simulate_movement(5000)
 
