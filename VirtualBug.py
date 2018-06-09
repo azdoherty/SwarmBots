@@ -17,7 +17,7 @@ class VirtualBug:
         self.x = np.random.randint(self.min_x, self.max_x)
         self.y = np.random.randint(self.min_y, self.max_y)
         self.heading = np.random.random() * 2 * np.pi
-        self.velocity = np.random.random() * 20
+        self.velocity = np.random.random() * 10
         self.last_moved = 0  # distance moved last
 
     def move(self):
@@ -38,10 +38,10 @@ class VirtualBug:
             self.heading = np.pi - self.heading
         if self.y > self.max_y:
             self.y = 2 * self.max_y - self.y
-            self.heading = -self.heading
+            self.heading = 2*np.pi - self.heading
         if self.y < self.min_y:
             self.y = abs(self.y)
-            self.heading = -self.heading
+            self.heading = 2*np.pi - self.heading
 
         self.last_moved = np.sqrt((old_x - self.x)**2 + (old_y - self.y)**2)
 
@@ -131,9 +131,9 @@ class BugZone:
                 self.turtles.append(turtle.Turtle())
                 #self.turtles[-1].tracer(False)
                 self.turtles[-1].penup()
-                self.turtles[-1].setheading(self.bugs[-1].heading * 360. / (2 * np.pi))
-                self.turtles[-1].setx(self.bugs[-1].x - self.bugs[-1].max_x * 1. / 2)
-                self.turtles[-1].sety(self.bugs[-1].y - self.bugs[-1].max_y * 1. / 2)
+                self.turtles[-1].setheading(b.heading * 360. / (2 * np.pi))
+                self.turtles[-1].setx(b.x - b.max_x * 1. / 2)
+                self.turtles[-1].sety(b.y - b.max_y * 1. / 2)
                 r, g, b = np.random.randint(1, 255), np.random.randint(1, 255), np.random.randint(1, 255)
                 self.canvas.colormode(255)
                 self.turtles[-1].color(r, g, b)
@@ -165,16 +165,22 @@ class BugZone:
         for i in range(nmoves):
             for k in range(len(self.bugs)):
                 self.bugs[k].move()
-                self.turtles[k].setheading(self.bugs[k].heading * 360. / (2 * np.pi))
+                self.turtles[k].setheading((self.bugs[k].heading * 360. / (2 * np.pi)) % 360)
                 self.turtles[k].forward(self.bugs[k].last_moved)
+                x,y = self.bugs[k].x, self.bugs[k].y
+                tx, ty = self.turtles[k].xcor(), self.turtles[k].ycor()
+                #self.turtles[k].setx(x)
+                #self.turtles[k].sety(y)
+                print(k, x, tx)
         self.canvas.exitonclick()
 
 if __name__ == "__main__":
     '''
     pos = move_trial(10000)
     static_plot(pos)
+    
     b = VirtualBug()
-    dynamic_tracking(b, 1000)
+    dynamic_tracking(b, 100000)
     '''
     b = BugZone(5, True)
     b.simulate_movement(500)
