@@ -106,4 +106,4 @@ if __name__ == "__main__":
     pos = move_trial(10000)
     static_plot(pos)
     b = VirtualBug()
-    dynamic_tracking(b, 1000)
+    dynamic_tracking(b, 10000)
