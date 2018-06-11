@@ -1,5 +1,16 @@
 Kalman Filter sources:
     https://balzer82.github.io/Kalman/
+    https://github.com/rlabbe/Kalman-and-Bayesian-Filters-in-Python/blob/master/11-Extended-Kalman-Filters.ipynb
 
 Particle Filter sources:
     https://en.wikipedia.org/wiki/Particle_filter
+Learning algs
+    Fast RCNN - regional based convolutional neural network?
+    YOLO -
+    SSD -
+
+communicate with gopro over wifi
+
+How to install opencv:
+    https://pypi.org/project/opencv-python/
+
