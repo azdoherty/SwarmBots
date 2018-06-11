@@ -15,6 +15,8 @@ class Particle:
         self.particlesY = np.random.random(self.nParticles) * self.yMax
 
     def update(self, mx, my):
+        pass
+    
 
 if __name__ == "__main__":
     pass
