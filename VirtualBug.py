@@ -149,6 +149,7 @@ class BugZone:
         # coordinate system needs to be transformed by half of the bounds of the box
         # draw box
         t = turtle.Turtle()
+        t.hideturtle()
         t.penup()
         t.speed("fastest")
         t.setx(-self.xshape * 1. / 2)
