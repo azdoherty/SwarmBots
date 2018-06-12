@@ -185,10 +185,10 @@ if __name__ == "__main__":
     '''
     pos = move_trial(10000)
     static_plot(pos)
-    
     b = VirtualBug()
-    dynamic_tracking(b, 100000)
+    dynamic_tracking(b, 10000)
     '''
     b = BugZone(10, True)
     b.simulate_movement(5000)
+
 
