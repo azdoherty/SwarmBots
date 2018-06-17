@@ -16,24 +16,26 @@ class Kalman:
         self.R = np.identity(self.X.shape[0]) * self.measurement_noise
         self.I = np.identity(self.X.shape[0])
 
-    def update(self, measurement):
+    def updatePredict(self, measurement):
+        """
+        :param measurement: x, y coordinate as 2 element numpy array
+        :return:
+        """
+        # use the new measurement to correct current prediction
         self.prev_X = self.X
         xdotMeasured = measurement[0] - self.X[0]
         ydotMeasured = measurement[1] - self.X[1]
         Z = np.matrix([[measurement[0], measurement[1], xdotMeasured, ydotMeasured]])
         Y = Z - self.H * self.X
         S = self.H * self.P * self.H.transpose()
-        K = self.P * self.H.transpose()
-        X = X + K * Y
-        P = (I - K * H) * P
+        K = self.P * self.H.transpose() * S.inverse()
+        self.X = self.X + K * Y
+        self.P = (self.I - K * self.H) * self.P
 
-        pass
+        # create new prediction for next measurement
+        self.X = np.matrix([self.X[0] + self.X[2], self.X[1] + self.X[3], self.X[2], self.X[3]])
 
-    def predict(self, movement):
-        # state transition
-        # F*X + u -- transition times state + motion
-        #
-        pass
+
 
 
 class Particle:
