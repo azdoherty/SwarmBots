@@ -11,24 +11,10 @@ class Kalman:
         self.prev_X = np.matrix([[x1, y1, self.xdot, self.ydot]])
         self.X = np.matrix([[x2, y2, self.xdot, self.ydot]])
         self.measurement_noise = 1.0
-        self.H = np.matrix([[1.0, 0.0, 0.0, 0.0],
-                                    [0.0, 1.0, 0.0, 0.0],
-                                    [0.0, 0.0, 1.0, 0.0],
-                                    [0.0, 0.0, 0.0, 1.0]])
-
-        self.P = np.matrix([[100.0, 0.0, 0.0, 0.0],
-                            [0.0, 100.0, 0.0, 0.0],
-                            [0.0, 0.0, 100.0, 0.0],
-                            [0.0, 0.0, 0.0, 100.0]])
-        self.R = np.matrix([[self.measurement_noise, 0.0, 0.0, 0.0],
-                    [0.0, self.measurement_noise, 0.0, 0.0],
-                    [0.0, 0.0, self.measurement_noise, 0.0],
-                    [0.0, 0.0, 0.0, self.measurement_noise]])
-
-        self.I = np.matrix([[1.0, 0.0, 0.0, 0.0],
-                    [0.0, 1.0, 0.0, 0.0],
-                    [0.0, 0.0, 1.0, 0.0],
-                    [0.0, 0.0, 0.0, 1.0]])
+        self.H = np.identity(self.X.shape[0])
+        self.P = np.identity(self.X.shape[0]) * 100
+        self.R = np.identity(self.X.shape[0]) * self.measurement_noise
+        self.I = np.identity(self.X.shape[0])
 
     def update(self, measurement):
         self.prev_X = self.X
@@ -38,7 +24,8 @@ class Kalman:
         Y = Z - self.H * self.X
         S = self.H * self.P * self.H.transpose()
         K = self.P * self.H.transpose()
-
+        X = X + K * Y
+        P = (I - K * H) * P
 
         pass
 
