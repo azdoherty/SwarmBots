@@ -23,17 +23,17 @@ class Kalman:
         """
         # use the new measurement to correct current prediction
         self.prev_X = self.X
-        xdotMeasured = measurement[0] - self.X[0]
-        ydotMeasured = measurement[1] - self.X[1]
+        xdotMeasured = measurement[0] - self.X[0,0]
+        ydotMeasured = measurement[1] - self.X[0,1]
         Z = np.matrix([[measurement[0], measurement[1], xdotMeasured, ydotMeasured]])
         Y = Z - self.H * self.X
         S = self.H * self.P * self.H.transpose()
-        K = self.P * self.H.transpose() * S.inverse()
+        K = self.P * self.H.transpose() * np.linalg.inv(S)
         self.X = self.X + K * Y
         self.P = (self.I - K * self.H) * self.P
 
         # create new prediction for next measurement
-        self.X = np.matrix([self.X[0] + self.X[2], self.X[1] + self.X[3], self.X[2], self.X[3]])
+        self.X = np.matrix([self.X[0, 0] + self.X[0, 2], self.X[0, 1] + self.X[0, 3], self.X[0, 2], self.X[0, 3]])
 
 
 
