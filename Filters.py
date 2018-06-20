@@ -1,11 +1,11 @@
 import numpy as np
-
+import logging
 
 class Kalman:
     """
     Extended kalman filter for non linear 2-d motion
     """
-    def __init__(self, x1, y1, x2, y2):
+    def __init__(self, x1, y1, x2, y2, logger=False):
         self.xdot = x2 - x1
         self.ydot = y2 - y1
         self.prev_X = np.matrix([[x1, y1, self.xdot, self.ydot]])
@@ -15,6 +15,13 @@ class Kalman:
         self.P = np.identity(self.X.shape[0]) * 100
         self.R = np.identity(self.X.shape[0]) * self.measurement_noise
         self.I = np.identity(self.X.shape[0])
+        self.logger = logger
+        if logger:
+            logging.basicConfig(filename='example.log', level=logging.DEBUG)
+            logging.debug('This message should go to the log file')
+            logging.info('So should this')
+            logging.warning('And this, too')
+
 
     def updatePredict(self, measurement):
         """
@@ -34,8 +41,13 @@ class Kalman:
 
         # create new prediction for next measurement
         self.X = np.matrix([self.X[0, 0] + self.X[0, 2], self.X[0, 1] + self.X[0, 3], self.X[0, 2], self.X[0, 3]])
-
-
+        # compute jacobian
+        jacobian = np.matrix([[1.0, 0.0, 0.0, 0.0],
+                             [0.0, 1.0,  0.0, 0.0],
+                             [0.0, 0.0, 1.0, 0.0],
+                             [0.0, 0.0, 0.0, 1.0]])
+        print(self.P)
+        self.P = jacobian * self.P * jacobian.transpose()
 
 
 class Particle:

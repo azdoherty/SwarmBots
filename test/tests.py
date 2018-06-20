@@ -16,7 +16,7 @@ class TestFilters(unittest.TestCase):
     def test_kalman_line_2d(self):
         testData = generate_line_2d_data()
         x1, y1, x2, y2 = testData[0, 0], testData[0, 1], testData[1, 0], testData[1, 1]
-        KF = Filters.Kalman(x1, y1, x2, y2)
+        KF = Filters.Kalman(x1, y1, x2, y2, logger=True)
         for i in range(2, testData.shape[0]):
             print(testData[i], KF.X)
             KF.updatePredict(testData[i])
