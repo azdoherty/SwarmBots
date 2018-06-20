@@ -1,5 +1,6 @@
 import numpy as np
 import logging
+import time
 
 class Kalman:
     """
@@ -8,8 +9,8 @@ class Kalman:
     def __init__(self, x1, y1, x2, y2, logger=False):
         self.xdot = x2 - x1
         self.ydot = y2 - y1
-        self.prev_X = np.matrix([[x1, y1, self.xdot, self.ydot]])
-        self.X = np.matrix([[x2, y2, self.xdot, self.ydot]])
+        self.prev_X = np.array([x1, y1, self.xdot, self.ydot])
+        self.X = np.array([x2, y2, self.xdot, self.ydot])
         self.measurement_noise = 1.0
         self.H = np.identity(self.X.shape[0])
         self.P = np.identity(self.X.shape[0]) * 100
@@ -18,9 +19,14 @@ class Kalman:
         self.logger = logger
         if logger:
             logging.basicConfig(filename='example.log', level=logging.DEBUG)
-            logging.debug('This message should go to the log file')
-            logging.info('So should this')
-            logging.warning('And this, too')
+            logging.info(time.time())
+            logging.debug("\n{}".format(self.X))
+            logging.debug("\n{}".format(self.prev_X))
+            logging.debug("\n{}".format(self.H))
+            logging.debug("\n{}".format(self.P))
+            logging.debug("\n{}".format(self.R))
+            logging.debug("\n{}".format(self.I))
+
 
 
     def updatePredict(self, measurement):
@@ -30,23 +36,26 @@ class Kalman:
         """
         # use the new measurement to correct current prediction
         self.prev_X = self.X
-        xdotMeasured = measurement[0] - self.X[0,0]
-        ydotMeasured = measurement[1] - self.X[0,1]
-        Z = np.matrix([[measurement[0], measurement[1], xdotMeasured, ydotMeasured]])
-        Y = Z - self.H * self.X
-        S = self.H * self.P * self.H.transpose()
-        K = self.P * self.H.transpose() * np.linalg.inv(S)
-        self.X = self.X + K * Y
-        self.P = (self.I - K * self.H) * self.P
+        xdotMeasured = measurement[0] - self.X[0]
+        ydotMeasured = measurement[1] - self.X[1]
+        Z = np.array([measurement[0], measurement[1], xdotMeasured, ydotMeasured])
+        Y = Z - np.dot(self.H, self.X)
+        S = np.dot(self.H, np.dot(self.P,self.H.transpose()))
+        K = np.dot(self.P, np.dot(self.H.transpose(), np.linalg.pinv(S)))
+        self.X = self.X + np.dot(K, Y)
+        if self.logger:
+            logging.debug(self.P)
+        self.P = np.dot((self.I - np.dot(K, self.H)), self.P)
 
         # create new prediction for next measurement
-        self.X = np.matrix([self.X[0, 0] + self.X[0, 2], self.X[0, 1] + self.X[0, 3], self.X[0, 2], self.X[0, 3]])
+        self.X = np.array([self.X[0] + self.X[2], self.X[1] + self.X[3], self.X[2], self.X[3]])
         # compute jacobian
         jacobian = np.matrix([[1.0, 0.0, 0.0, 0.0],
                              [0.0, 1.0,  0.0, 0.0],
                              [0.0, 0.0, 1.0, 0.0],
                              [0.0, 0.0, 0.0, 1.0]])
-        print(self.P)
+        if self.logger:
+            logging.debug(self.P)
         self.P = jacobian * self.P * jacobian.transpose()
 
 
