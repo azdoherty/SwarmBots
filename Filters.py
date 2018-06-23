@@ -18,7 +18,7 @@ class Kalman:
         self.I = np.identity(self.X.shape[0])
         self.logger = logger
         if logger:
-            logging.basicConfig(filename='example.log', level=logging.DEBUG)
+            logging.basicConfig(filename='example.log', level=logging.DEBUG, filemode='w')
             logging.info(time.time())
             logging.debug("\n{}".format(self.X))
             logging.debug("\n{}".format(self.prev_X))
@@ -42,22 +42,34 @@ class Kalman:
         Y = Z - np.dot(self.H, self.X)
         S = np.dot(self.H, np.dot(self.P,self.H.transpose()))
         K = np.dot(self.P, np.dot(self.H.transpose(), np.linalg.pinv(S)))
+        if self.logger:
+            logging.debug("start")
+            logging.debug("K:\n{}".format(K))
+            logging.debug("speed: {},{}".format(xdotMeasured, ydotMeasured))
+            logging.debug("Y:\n{}".format(Y))
+            logging.debug("X:\n{}".format(self.X))
+            logging.debug("K dot Y:\n{}".format(np.dot(K, Y)))
         self.X = self.X + np.dot(K, Y)
         if self.logger:
-            logging.debug(self.P)
+            logging.debug("start")
+            logging.debug("P:\n{}".format(self.P))
+            logging.debug("X:\n{}".format(self.X))
         self.P = np.dot((self.I - np.dot(K, self.H)), self.P)
 
         # create new prediction for next measurement
+        # state transition funciton = [x + xdot, y + ydot, xdot, ydot]
         self.X = np.array([self.X[0] + self.X[2], self.X[1] + self.X[3], self.X[2], self.X[3]])
         # compute jacobian
-        jacobian = np.matrix([[1.0, 0.0, 0.0, 0.0],
-                             [0.0, 1.0,  0.0, 0.0],
+        jacobian = np.array([[1.0, 0.0, 1.0, 0.0],
+                             [0.0, 1.0,  0.0, 1.0],
                              [0.0, 0.0, 1.0, 0.0],
                              [0.0, 0.0, 0.0, 1.0]])
-        if self.logger:
-            logging.debug(self.P)
-        self.P = jacobian * self.P * jacobian.transpose()
 
+        self.P = np.dot(jacobian, np.dot(self.P, jacobian.transpose()))
+        if self.logger:
+            logging.debug("end")
+            logging.debug("P:\n{}".format(self.P))
+            logging.debug("X:\n{}".format(self.X))
 
 class Particle:
     def __init__(self, nParticles, xMax, yMax):
