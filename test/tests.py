@@ -29,8 +29,9 @@ class TestFilters(unittest.TestCase):
             predictions[i, :] = KF.X[0:2]
         print(predictions)
         fig = plt.figure()
+        plt.title("Linear Tracking Test")
         plt.plot(testData[:, 0], testData[:, 1], 'b-', label="True")
         plt.plot(predictions[:, 0], predictions[:, 1], 'r--', label="Tracked")
         plt.legend()
-        plt.savefig("test_positions_line.png")
+        plt.savefig("test_positions_line.png", dpi=500)
 
