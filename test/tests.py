@@ -19,7 +19,7 @@ def generate_parabola_2d_data(dist=500, noiseLvl=1.):
 class TestFilters(unittest.TestCase):
 
     def test_kalman_line_2d(self):
-        testData = generate_line_2d_data(10, .5)
+        testData = generate_line_2d_data(500, 3)
         x1, y1, x2, y2 = testData[0, 0], testData[0, 1], testData[1, 0], testData[1, 1]
         KF = Filters.Kalman(x1, y1, x2, y2, logger=True)
         predictions = np.zeros((testData.shape[0],2))
@@ -29,7 +29,8 @@ class TestFilters(unittest.TestCase):
             predictions[i, :] = KF.X[0:2]
         print(predictions)
         fig = plt.figure()
-        plt.plot(testData[:, 0], testData[:, 1], 'b-')
-        plt.plot(predictions[:, 0], predictions[:, 1], 'r--')
+        plt.plot(testData[:, 0], testData[:, 1], 'b-', label="True")
+        plt.plot(predictions[:, 0], predictions[:, 1], 'r--', label="Tracked")
+        plt.legend()
         plt.savefig("test_positions_line.png")
 
