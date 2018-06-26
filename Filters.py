@@ -11,21 +11,22 @@ class Kalman:
         self.ydot = y2 - y1
         self.prev_X = np.array([x1, y1, self.xdot, self.ydot])
         self.X = np.array([x2, y2, self.xdot, self.ydot])
-        self.measurement_noise = 1.0
-        self.H = np.identity(self.X.shape[0])
-        self.P = np.identity(self.X.shape[0]) * 100
-        self.R = np.identity(self.X.shape[0]) * self.measurement_noise
-        self.I = np.identity(self.X.shape[0])
+        self.measurement_noise = 2.
+        self.H = np.array(np.identity(self.X.shape[0]))
+        self.P = np.array(np.identity(self.X.shape[0]) * 100)
+        self.R = np.array(np.identity(self.X.shape[0]) * self.measurement_noise)
+        self.I = np.array(np.identity(self.X.shape[0]))
         self.logger = logger
+        self.i=0
         if logger:
             logging.basicConfig(filename='example.log', level=logging.DEBUG, filemode='w')
             logging.info(time.time())
-            logging.debug("\n{}".format(self.X))
-            logging.debug("\n{}".format(self.prev_X))
-            logging.debug("\n{}".format(self.H))
-            logging.debug("\n{}".format(self.P))
-            logging.debug("\n{}".format(self.R))
-            logging.debug("\n{}".format(self.I))
+            logging.debug("H:\n{}".format(self.H))
+            logging.debug("P:\n{}".format(self.P))
+            logging.debug("R:\n{}".format(self.R))
+            logging.debug("I:\n{}".format(self.I))
+            logging.debug("\n\n\n\n")
+
 
 
 
@@ -39,22 +40,29 @@ class Kalman:
         xdotMeasured = measurement[0] - self.X[0]
         ydotMeasured = measurement[1] - self.X[1]
         Z = np.array([measurement[0], measurement[1], xdotMeasured, ydotMeasured])
-        Y = Z - np.dot(self.H, self.X)
-        S = np.dot(self.H, np.dot(self.P,self.H.transpose()))
-        K = np.dot(self.P, np.dot(self.H.transpose(), np.linalg.pinv(S)))
+        Y = Z - self.H @ self.X
+        S = self.H @ self.P @ self.H.transpose() + self.R
+        K = self.P @ self.H.transpose() @ np.linalg.pinv(S)
+        self.i+=1
         if self.logger:
-            logging.debug("start")
+            logging.debug("start {}".format(self.i))
             logging.debug("K:\n{}".format(K))
+            logging.debug("S:\n{}".format(S))
+            logging.debug("S inverse:\n{}".format(np.linalg.pinv(S)))
             logging.debug("speed: {},{}".format(xdotMeasured, ydotMeasured))
             logging.debug("Y:\n{}".format(Y))
             logging.debug("X:\n{}".format(self.X))
-            logging.debug("K dot Y:\n{}".format(np.dot(K, Y)))
+            logging.debug("K dot Y:\n{}".format(K @ Y))
         self.X = self.X + np.dot(K, Y)
         if self.logger:
-            logging.debug("start")
+            logging.debug("update {}".format(self.i))
             logging.debug("P:\n{}".format(self.P))
             logging.debug("X:\n{}".format(self.X))
-        self.P = np.dot((self.I - np.dot(K, self.H)), self.P)
+            logging.debug("K dot H:\n{}".format(K @self.H))
+            logging.debug("K:\n{}".format(K))
+
+        self.P = (self.I - K @ self.H) @ self.P
+
 
         # create new prediction for next measurement
         # state transition funciton = [x + xdot, y + ydot, xdot, ydot]
@@ -67,10 +75,11 @@ class Kalman:
 
         self.P = np.dot(jacobian, np.dot(self.P, jacobian.transpose()))
         if self.logger:
-            logging.debug("end")
+            logging.debug("end {}".format(self.i))
             logging.debug("P:\n{}".format(self.P))
+            logging.debug("P dot jac:\n{}".format(self.P @ jacobian.transpose()))
             logging.debug("X:\n{}".format(self.X))
-
+            logging.debug("\n\n\n\n")
 class Particle:
     def __init__(self, nParticles, xMax, yMax):
         self.nParticles = nParticles
