@@ -35,3 +35,20 @@ class TestFilters(unittest.TestCase):
         plt.legend()
         plt.savefig("test_positions_line.png", dpi=500)
 
+    def test_kalman_parabola_2d(self):
+        testData = generate_parabola_2d_data(50, 3)
+        x1, y1, x2, y2 = testData[0, 0], testData[0, 1], testData[1, 0], testData[1, 1]
+        KF = Filters.Kalman(x1, y1, x2, y2, logger=True)
+        predictions = np.zeros((testData.shape[0],2))
+        for i in range(2, testData.shape[0]):
+            print(testData[i], KF.X)
+            KF.updatePredict(testData[i])
+            predictions[i, :] = KF.X[0:2]
+        print(predictions)
+        fig = plt.figure()
+        plt.title("Parabolic Tracking Test")
+        plt.plot(testData[:, 0], testData[:, 1], 'b-', label="True")
+        plt.plot(predictions[:, 0], predictions[:, 1], 'r--', label="Tracked")
+        plt.legend()
+        plt.savefig("test_positions_parabola.png", dpi=500)
+
