@@ -11,7 +11,7 @@ class Kalman:
         self.ydot = y2 - y1
         self.prev_X = np.array([x1, y1, self.xdot, self.ydot])
         self.X = np.array([x2, y2, self.xdot, self.ydot])
-        self.measurement_noise = 2.
+        self.measurement_noise = 5.
         self.H = np.array(np.identity(self.X.shape[0]))
         self.P = np.array(np.identity(self.X.shape[0]) * 100)
         self.R = np.array(np.identity(self.X.shape[0]) * self.measurement_noise)
