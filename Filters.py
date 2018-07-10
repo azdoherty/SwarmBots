@@ -2,6 +2,23 @@ import numpy as np
 import logging
 import time
 
+
+def jacobian4d(X=None, fX=None):
+    jacobian = np.array([[1.0, 0.0, 1.0, 0.0],
+                         [0.0, 1.0, 0.0, 1.0],
+                         [0.0, 0.0, 1.0, 0.0],
+                         [0.0, 0.0, 0.0, 1.0]])
+    return jacobian
+
+def jacobian6d(X=None, fX=None):
+    jacobian = np.array([[1.0, 0.0, 1.0, 0.0, 2*X[-2], 0.0],
+                         [0.0, 1.0, 0.0, 1.0, 2*X[-1], 0.0],
+                         [0.0, 0.0, 1.0, 0.0, 1.0, 0.0],
+                         [0.0, 0.0, 0.0, 1.0, 0.0, 1.0],
+                         [0.0, 0.0, 0.0, 0.0, 1.0, 0.0],
+                         [0.0, 0.0, 0.0, 0.0, 0.0, 1.0]])
+    return jacobian
+
 class Kalman:
     def __init__(self, dim, logger=False):
         """
@@ -28,16 +45,9 @@ class Kalman:
             logging.debug("I:\n{}".format(self.I))
             logging.debug("\n\n\n\n")
 
-    def measure_non_observable(self, measurement):
-        if self.dim == 4:
-            velocity = measurement - self.X[0:2]
-            Z = np.array([measurement[0], measurement[1], velocity[0], velocity[1]])
-        elif self.dim == 6:
-            velocity1 = measurement
 
 
-
-    def updatePredict(self, measurement):
+    def updatePredict(self, measurement, jacobianFN):
         """
         :param measurement: x, y coordinate as 2 element numpy array or x,y,z numpy array
         :return:
@@ -46,21 +56,19 @@ class Kalman:
         self.i += 1
         # use the new measurement to correct current prediction
         if len(self.measurements) < 2 or (len(self.measurements) < 3 and self.dim == 6):
-
             return self.X
 
-        elif len(self.measurements) == 2 and self.dim == 4:
-            velocity = self.measurements[1] - self.measurements[0]
+        elif len(self.measurements) >= 2 and self.dim == 4:
+            velocity = self.measurements[self.i] - self.measurements[self.i-1]
             Z = np.array([measurement[0], measurement[1], velocity[0], velocity[1]])
 
-        elif len(self.measurements) == 3 and self.dim == 6:
-            velocity1 = self.measurements[1] - self.measurements[0]
-            velocity2 = self.measurements[2] - self.measurements[1]
+        elif len(self.measurements) >= 3 and self.dim == 6:
+            velocity1 = self.measurements[self.i-1] - self.measurements[self.i-2]
+            velocity2 = self.measurements[self.i] - self.measurements[self.i-1]
             acceleration = velocity2 - velocity1
             Z = np.array([measurement[0], measurement[1], velocity2[0], velocity2[1], acceleration[0], acceleration[1]])
 
-        elif (len(self.measurements) > 2 and self.dim == 4) or (len(self.measurements) >3 and self.dim==6):
-            Z = self.measure_non_observable()
+
 
         self.prev_X = self.X
         Y = Z - self.H @ self.X
@@ -84,17 +92,16 @@ class Kalman:
             logging.debug("K:\n{}".format(K))
 
         self.P = (self.I - K @ self.H) @ self.P
+        if self.dim == 4:
+            jacobian = jacobian4d()
+        elif self.dim == 6:
+            jacobian6d(X=self.X)
+
 
 
         # create new prediction for next measurement
         # state transition funciton = [x + xdot, y + ydot, xdot, ydot]
         self.X = np.array([self.X[0] + self.X[2], self.X[1] + self.X[3], self.X[2], self.X[3]])
-        # compute jacobian
-        jacobian = np.array([[1.0, 0.0, 1.0, 0.0],
-                             [0.0, 1.0,  0.0, 1.0],
-                             [0.0, 0.0, 1.0, 0.0],
-                             [0.0, 0.0, 0.0, 1.0]])
-
         self.P = np.dot(jacobian, np.dot(self.P, jacobian.transpose()))
         if self.logger:
             logging.debug("end {}".format(self.i))
