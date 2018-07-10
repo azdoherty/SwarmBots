@@ -3,21 +3,22 @@ import logging
 import time
 
 class Kalman:
-    """
-    Extended kalman filter for non linear 2-d motion
-    """
-    def __init__(self, x1, y1, x2, y2, logger=False):
-        self.xdot = x2 - x1
-        self.ydot = y2 - y1
-        self.prev_X = np.array([x1, y1, self.xdot, self.ydot])
-        self.X = np.array([x2, y2, self.xdot, self.ydot])
+    def __init__(self, dim, logger=False):
+        """
+        :param dims: integer, number of dimensions in the filter, always d1 d1/dt d^21/dt^2, d2, d2/dt etcetera
+        :param logger: log a bunch of things if true
+        """
+
         self.measurement_noise = 5.
-        self.H = np.array(np.identity(self.X.shape[0]))
-        self.P = np.array(np.identity(self.X.shape[0]) * 100)
-        self.R = np.array(np.identity(self.X.shape[0]) * self.measurement_noise)
-        self.I = np.array(np.identity(self.X.shape[0]))
+        self.dim = dim
+        self.H = np.array(np.identity(dim))
+        self.P = np.array(np.identity(dim) * 100)
+        self.R = np.array(np.identity(dim) * self.measurement_noise)
+        self.I = np.array(np.identity(dim))
         self.logger = logger
-        self.i=0
+        self.i = 0
+        self.X = None
+        self.measurements = []
         if logger:
             logging.basicConfig(filename='example.log', level=logging.DEBUG, filemode='w')
             logging.info(time.time())
@@ -27,18 +28,32 @@ class Kalman:
             logging.debug("I:\n{}".format(self.I))
             logging.debug("\n\n\n\n")
 
-
+    def measure_non_observable(self, measurement):
+        if self.d
 
 
     def updatePredict(self, measurement):
         """
-        :param measurement: x, y coordinate as 2 element numpy array
+        :param measurement: x, y coordinate as 2 element numpy array or x,y,z numpy array
         :return:
         """
         # use the new measurement to correct current prediction
+        if len(self.measurements) < 2 or ( len(self.measurements) < 3 and self.dim==6):
+            self.measurements.append(measurement)
+            self.X = np.empty(measurement.shape[0])
+            return self.X
+        elif len(self.measurements) == 2 and self.dim==4:
+            velocity = self.measurements[1] - self.measurements[0]
+            self.X = np.array([measurement[0], velocity[0], measurement[1], velocity[1]])
+
+        elif len(self.measurements) == 3 and self.dim==6:
+            velocity1 = self.measurements[1] - self.measurements[0]
+            velocity2 = self.measurements[2] - self.measurements[1]
+            acceleration = velocity2 - velocity1
+            self.X = np.array([measurement[0], velocity2[0], acceleration[0], measurement[1], velocity2[1],
+                               acceleration[1]])
+
         self.prev_X = self.X
-        xdotMeasured = measurement[0] - self.X[0]
-        ydotMeasured = measurement[1] - self.X[1]
         Z = np.array([measurement[0], measurement[1], xdotMeasured, ydotMeasured])
         Y = Z - self.H @ self.X
         S = self.H @ self.P @ self.H.transpose() + self.R
