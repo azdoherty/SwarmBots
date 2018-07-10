@@ -29,7 +29,12 @@ class Kalman:
             logging.debug("\n\n\n\n")
 
     def measure_non_observable(self, measurement):
-        if self.d
+        if self.dim == 4:
+            velocity = measurement - self.X[0:2]
+            Z = np.array([measurement[0], measurement[1], velocity[0], velocity[1]])
+        elif self.dim == 6:
+            velocity1 = measurement
+
 
 
     def updatePredict(self, measurement):
@@ -37,28 +42,30 @@ class Kalman:
         :param measurement: x, y coordinate as 2 element numpy array or x,y,z numpy array
         :return:
         """
+        self.measurements.append(measurement)
+        self.i += 1
         # use the new measurement to correct current prediction
-        if len(self.measurements) < 2 or ( len(self.measurements) < 3 and self.dim==6):
-            self.measurements.append(measurement)
-            self.X = np.empty(measurement.shape[0])
-            return self.X
-        elif len(self.measurements) == 2 and self.dim==4:
-            velocity = self.measurements[1] - self.measurements[0]
-            self.X = np.array([measurement[0], velocity[0], measurement[1], velocity[1]])
+        if len(self.measurements) < 2 or (len(self.measurements) < 3 and self.dim == 6):
 
-        elif len(self.measurements) == 3 and self.dim==6:
+            return self.X
+
+        elif len(self.measurements) == 2 and self.dim == 4:
+            velocity = self.measurements[1] - self.measurements[0]
+            Z = np.array([measurement[0], measurement[1], velocity[0], velocity[1]])
+
+        elif len(self.measurements) == 3 and self.dim == 6:
             velocity1 = self.measurements[1] - self.measurements[0]
             velocity2 = self.measurements[2] - self.measurements[1]
             acceleration = velocity2 - velocity1
-            self.X = np.array([measurement[0], velocity2[0], acceleration[0], measurement[1], velocity2[1],
-                               acceleration[1]])
+            Z = np.array([measurement[0], measurement[1], velocity2[0], velocity2[1], acceleration[0], acceleration[1]])
+
+        elif (len(self.measurements) > 2 and self.dim == 4) or (len(self.measurements) >3 and self.dim==6):
+            Z = self.measure_non_observable()
 
         self.prev_X = self.X
-        Z = np.array([measurement[0], measurement[1], xdotMeasured, ydotMeasured])
         Y = Z - self.H @ self.X
         S = self.H @ self.P @ self.H.transpose() + self.R
         K = self.P @ self.H.transpose() @ np.linalg.pinv(S)
-        self.i+=1
         if self.logger:
             logging.debug("start {}".format(self.i))
             logging.debug("K:\n{}".format(K))
