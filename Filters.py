@@ -47,7 +47,7 @@ class Kalman:
 
 
 
-    def updatePredict(self, measurement, jacobianFN):
+    def updatePredict(self, measurement):
         """
         :param measurement: x, y coordinate as 2 element numpy array or x,y,z numpy array
         :return:
@@ -61,12 +61,17 @@ class Kalman:
         elif len(self.measurements) >= 2 and self.dim == 4:
             velocity = self.measurements[self.i] - self.measurements[self.i-1]
             Z = np.array([measurement[0], measurement[1], velocity[0], velocity[1]])
+            if self.measurements == 2:
+                self.X = Z
+
 
         elif len(self.measurements) >= 3 and self.dim == 6:
             velocity1 = self.measurements[self.i-1] - self.measurements[self.i-2]
             velocity2 = self.measurements[self.i] - self.measurements[self.i-1]
             acceleration = velocity2 - velocity1
             Z = np.array([measurement[0], measurement[1], velocity2[0], velocity2[1], acceleration[0], acceleration[1]])
+            if self.measurements == 3:
+                self.X = Z
 
 
 
@@ -79,7 +84,6 @@ class Kalman:
             logging.debug("K:\n{}".format(K))
             logging.debug("S:\n{}".format(S))
             logging.debug("S inverse:\n{}".format(np.linalg.pinv(S)))
-            logging.debug("speed: {},{}".format(xdotMeasured, ydotMeasured))
             logging.debug("Y:\n{}".format(Y))
             logging.debug("X:\n{}".format(self.X))
             logging.debug("K dot Y:\n{}".format(K @ Y))
