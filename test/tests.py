@@ -2,6 +2,7 @@ import unittest
 import numpy as np
 from matplotlib import pyplot as plt
 import Filters
+import VirtualBug
 
 def generate_line_2d_data(dist=500, noiseLvl=1.):
     data = np.zeros((dist, 2))
@@ -34,6 +35,7 @@ class TestFilters(unittest.TestCase):
         plt.plot(predictions[:, 0], predictions[:, 1], 'r--', label="Tracked")
         plt.legend()
         plt.savefig("test_positions_line.png", dpi=500)
+        plt.close()
 
     def test_kalman_parabola_2d(self):
         testData = generate_parabola_2d_data(50, 3)
@@ -51,4 +53,37 @@ class TestFilters(unittest.TestCase):
         plt.plot(predictions[:, 0], predictions[:, 1], 'r--', label="Tracked")
         plt.legend()
         plt.savefig("test_positions_parabola.png", dpi=500)
+        plt.close()
+
+    def test_bug(self):
+        nmoves = 200
+        bugPositions = np.zeros((nmoves, 2))
+        trackedPositins  = np.zeros((nmoves, 2))
+        testBug = VirtualBug.VirtualBug()
+        kf = None
+        for i in range(nmoves):
+            bugPositions[i, :] = np.array([testBug.x, testBug.y])
+            if i == 2:
+                kf = Filters.Kalman(bugPositions[0, 0], bugPositions[0, 1], bugPositions[1, 0], bugPositions[1, 1])
+
+            if i > 2:
+                trackedPositins[i, 0] = kf.X[0]
+                trackedPositins[i, 1] = kf.X[1]
+                kf.updatePredict(bugPositions[i, :])
+
+            testBug.move()
+
+        plt.figure()
+        plt.title("Bug position tracking test")
+        plt.xlabel("x")
+        plt.ylabel("y")
+        plt.plot(bugPositions[:, 0], bugPositions[:, 1], 'b-', label="Bug")
+        plt.plot(trackedPositins[:, 0], trackedPositins[:, 1], 'r--', label="Tracked")
+        plt.legend()
+        plt.savefig("test_bug_tracking.png", dpi=500)
+        plt.close()
+
+
+
+
 
